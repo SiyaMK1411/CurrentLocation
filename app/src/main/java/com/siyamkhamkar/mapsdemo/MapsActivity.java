@@ -2,9 +2,14 @@ package com.siyamkhamkar.mapsdemo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Adapter;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,6 +32,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.siyamkhamkar.mapsdemo.databinding.ActivityMapsBinding;
+
+import java.io.IOException;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -135,6 +143,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    public void onClick(View v)
+    {
+        if(v.getId() == R.id.B_search)
+        {
+            EditText tf_location = (EditText)findViewById(R.id.TF_location);
+            String location = tf_location.getText().toString();
+            List<Address> addressList = null;
+            MarkerOptions mo= new MarkerOptions();
+            if(! location.equals(""))
+            {
+                Geocoder geocoder = new Geocoder(this);
+                try {
+                    addressList = geocoder.getFromLocationName(location,5);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                for(int i =0; i< addressList.size(); i++)
+                {
+                    Address myAddress = addressList.get(i);
+                    LatLng latLng = new LatLng(myAddress.getLatitude(),myAddress.getLongitude());
+                    mo.position(latLng);
+                    mo.title("Your search result.");
+                    mMap.addMarker(mo);
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                }
+            }
+        }
+
+    }
     @Override
     public void onConnected(@Nullable Bundle bundle) {
          locationRequest = new LocationRequest();
